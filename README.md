@@ -11,6 +11,7 @@ this repository will contain all labs for secure coding practices
 you can edit the script directly without restarting the containers
 
 #how to stop the container
+
 `docker compose down`
 
 
