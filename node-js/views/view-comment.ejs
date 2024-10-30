@@ -1,0 +1,72 @@
+<%- include('header') %>
+<div class="container-fluid">
+    <!-- Comments Table Card -->
+    <div class="card mb-4">
+        <div class="card-header">Comments</div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Comment ID</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% comments.forEach(comment => { %>
+                    <tr>
+                        <td><%= comment.comment_id %></td>
+                        <td><%- comment.name %></td>
+                        <td>
+                            <!-- View Button to open modal -->
+                            <button class="btn btn-info btn-sm" onclick="viewComment('<%- comment.comment_id %>', '<%= comment.comment %>')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <!-- Delete Button -->
+                            <button class="btn btn-danger btn-sm" onclick="deleteComment('<%- comment.comment_id %>')">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Viewing Comment -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentModalLabel">Comment Content</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="commentContent"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function viewComment(commentId, commentContent) {
+        document.getElementById('commentContent').innerHTML = commentContent;
+        $('#commentModal').modal('show');  // Show the modal
+    }
+
+    function deleteComment(commentId) {
+        if (confirm('Are you sure you want to delete this comment?')) {
+
+            alert('Comment ID ' + commentId + ' deleted.');
+        }
+    }
+</script>
+
+<%- include('footer') %>

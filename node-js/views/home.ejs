@@ -1,0 +1,74 @@
+<%- include('header') %>
+<div class="container-fluid">
+    <!-- Profile Card -->
+    <div class="card mb-4">
+        <div class="card-header">Profile Information</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> <%= profile.name %></p>
+                    <p><strong>Email:</strong> <%= profile.email %></p>
+                    <p><strong>Phone Number:</strong> <%= profile.phone_number || 'N/A' %></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Date of Birth:</strong> <%= profile.dob ? profile.dob.toISOString().slice(0, 10) : 'N/A' %></p>
+                    <p><strong>Account Created:</strong> <%= profile.created_at ? profile.created_at.toISOString().slice(0, 10) : 'N/A'%></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Picture Upload -->
+    <div class="card mb-4">
+        <div class="card-header">Upload Profile Picture</div>
+        <div class="card-body text-center">
+            <img id="profileImg" src="" alt="Profile Picture" class="profile-img mb-3">
+            <form id="profilePicForm">
+                <div class="form-group">
+                    <input type="file" class="form-control-file" id="profilePicture" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+            <div id="uploadMessage" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Password Section -->
+    <div class="card mb-4">
+        <div class="card-header">Password Security</div>
+        <div class="card-body">
+            <p>Update your password regularly to keep your account secure.</p>
+            <a href="#" class="btn btn-primary">Change Password</a>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('profilePicForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('profilePicture');
+        const formData = new FormData();
+        formData.append('profilePicture', fileInput.files[0]);
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            const data = await response.json();
+            document.getElementById('uploadMessage').textContent = data.message;
+            if (data.profilePictureUrl) {
+                document.getElementById('profileImg').src = data.profilePictureUrl;  // Update the profile image
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            document.getElementById('uploadMessage').textContent = 'Error uploading file';
+        }
+    });
+</script>
+<%- include('footer') %>

@@ -1,0 +1,47 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/usr/src/app
+      - ./uploads:/app/uploads 
+      - /usr/src/app/node_modules
+    environment:
+      - MYSQL_HOST=nodejs_db
+      - MYSQL_USER=securecode
+      - MYSQL_PASS=securecodepass
+      - MYSQL_DATABASE=securecodedb
+    depends_on:
+      - nodejs_db
+      - nginx
+    networks:
+      - app_network
+  nodejs_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootPassword321
+      MYSQL_DATABASE: securecodedb
+      MYSQL_USER: securecode
+      MYSQL_PASSWORD: securecodepass
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app_network
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - '80:80'
+    networks:
+      - app_network
+volumes:
+  db_data:
+networks:
+  app_network:
+    driver: bridge
+
+  
+    
