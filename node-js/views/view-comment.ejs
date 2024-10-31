@@ -16,14 +16,14 @@
                     <% comments.forEach(comment => { %>
                     <tr>
                         <td><%= comment.comment_id %></td>
-                        <td><%- comment.name %></td>
+                        <td><%= comment.name %></td>
                         <td>
                             <!-- View Button to open modal -->
-                            <button class="btn btn-info btn-sm" onclick="viewComment('<%- comment.comment_id %>', '<%= comment.comment %>')">
+                            <button class="btn btn-info btn-sm" onclick="viewComment('<%= comment.comment_id %>', '<%= comment.comment %>')">
                                 <i class="fas fa-eye"></i> View
                             </button>
                             <!-- Delete Button -->
-                            <button class="btn btn-danger btn-sm" onclick="deleteComment('<%- comment.comment_id %>')">
+                            <button class="btn btn-danger btn-sm" onclick="deleteComment('<%= comment.comment_id %>')">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </button>
                         </td>
