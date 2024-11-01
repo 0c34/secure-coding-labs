@@ -9,9 +9,9 @@ const db = require('../config/database');
 exports.getProfile = async({user_id}) => {
     console.log(`userid:${user_id}`)
     try {
-        const query = `SELECT * FROM user_accounts WHERE user_id = '${user_id}' `;
+        const query = 'SELECT * FROM user_accounts WHERE user_id = ?';
         console.log(`sql query: ${query}`)
-        const [rows] = await db.query(query);
+        const [rows] = await db.query(query, [user_id]);
         
         if (rows.length === 0) {
             console.log(`No data found for user_id: ${user_id}`);
@@ -26,8 +26,8 @@ exports.getProfile = async({user_id}) => {
     }
 }
 exports.checkExisting = async({ email }) => {
-    const query = `SELECT email FROM user_accounts where email='${email}'`;
-    const [existingUser] = await db.query(query)
+    const query = 'SELECT email FROM user_accounts where email=?';
+    const [existingUser] = await db.query(query,[email])
     return existingUser
 }
 

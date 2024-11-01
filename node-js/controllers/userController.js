@@ -1,11 +1,15 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+
 const md5 = require('md5');
 
+
 const JWT_SECRET = 'securecodesecret'
+const saltRounds = 10;
 
 exports.getProfile = async (req, res) =>{
-    const userId = req.user.user_id//req.query.user_id
+    const userId = req.user.user_id //req.user.user_id//r
     if (!userId){
         return res.status(400).send("User ID is requeired")
     }
@@ -37,7 +41,8 @@ exports.registerUser = async (req, res) => {
     if(isExsisting.length > 0){
         return res.status(400).send('Email already exists. Please use a different email.');
     }else{
-        const hashedPassword = md5(password);
+        //const hashedPassword = md5(password);
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         try {
             await User.createUser({ name, email, phone_number, password: hashedPassword, dob });
@@ -67,11 +72,28 @@ exports.loginPage = (req, res) => {
 exports.login = async(req, res) => {
     const {email, password} = req.body
     const user = await User.login({email:email})
-    if (user[0] && await comparePassword(password, user[0].password_hash)){
+    //const match = await bcrypt.compare(password, user[0].password_hash);
+    hashComp = await comparePassword(password, user[0].password_hash)
+    if (user[0] && hashComp){
         user_id = user[0].user_id
         token = await generateToken(user_id,JWT_SECRET)
         res.cookie('token', token);
         res.json({user_id})
+    }else{
+        res.status(401).json({message:'Invalid email or password'})
+    }
+}
+exports.loginMobile = async(req, res) => {
+    const {email, password} = req.body
+    const user = await User.login({email:email})
+    if (user[0] && await comparePassword(password, user[0].password_hash)){
+        user_id = user[0].user_id
+        phone_number = user[0].phone_number
+        user_email = user[0].email
+
+        token = await generateToken(user_id,JWT_SECRET)
+
+        res.json({token:token, data:{user_id,phone_number,user_email}})
     }else{
         res.status(401).json({message:'Invalid email or password'})
     }
