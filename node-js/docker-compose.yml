@@ -5,6 +5,7 @@ services:
       - .:/usr/src/app
       - ./uploads:/app/uploads 
       - /usr/src/app/node_modules
+    container_name: nodejs_app
     environment:
       - MYSQL_HOST=nodejs_db
       - MYSQL_USER=securecode
@@ -12,12 +13,12 @@ services:
       - MYSQL_DATABASE=securecodedb
     depends_on:
       - nodejs_db
-      - nginx
     networks:
       - app_network
   nodejs_db:
     image: mysql:8.0
     restart: always
+    container_name: nodejs_db
     environment:
       MYSQL_ROOT_PASSWORD: rootPassword321
       MYSQL_DATABASE: securecodedb
@@ -33,6 +34,8 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
     ports:
       - '80:80'
     networks:

@@ -12,7 +12,7 @@
         <h1 class="text-center mb-4">Register</h1>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form action="/register" method="POST">
+                <form>
                     <!-- Name Field -->
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
@@ -44,19 +44,87 @@
 
                     <!-- Submit Button -->
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="button" class="btn btn-primary" onclick="register()">Register</button>
                     </div>
                 </form>
+                
+            </div>
+           
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-6">
+                <div class="alert" id="alert-box" role="alert"></div>
             </div>
         </div>
-        <% if (typeof errorMessage !== 'undefined') { %>
-            <div class="alert alert-danger">
-                <%= errorMessage %>
-            </div>
-        <% } %>
     </div>
 
     <!-- Include Bootstrap 5 JS and Popper.js from CDN -->
+     <script>
+        async function register() {
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone_number = document.getElementById('phone_number').value;
+            const password = document.getElementById('password').value;
+            const dob = document.getElementById('dob').value;
+
+            // Reference the alert div
+            const alertBox = document.getElementById('alert-box');
+
+            // Clear previous alert classes & messages
+            alertBox.classList.add('d-none');
+            alertBox.classList.remove('alert-success', 'alert-danger');
+            alertBox.innerText = '';
+
+            if (!name || !email || !phone_number || !password || !dob) {
+                // Set error class and show message
+                alertBox.classList.add('alert-danger');
+                alertBox.innerText = 'All fields are required. Please fill in all fields.';
+
+                // Show the alert
+                alertBox.classList.remove('d-none');
+                return;
+            }
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone_number, password, dob })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Set success class and show message
+                    alertBox.classList.add('alert-success');
+                    alertBox.innerText = 'Registration successful! Redirecting...';
+                    
+                    // Show the alert
+                    alertBox.classList.remove('d-none');
+
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    // Set error class and show message
+                    alertBox.classList.add('alert-danger');
+                    alertBox.innerText = result.message || 'Registration failed. Please try again.';
+
+                    // Show the alert
+                    alertBox.classList.remove('d-none');
+                }
+            } catch (error) {
+                
+                // Set error class for unexpected errors
+                alertBox.classList.add('alert-danger');
+                alertBox.innerText = 'Something went wrong. Please try again later.';
+                
+                // Show the alert
+                alertBox.classList.remove('d-none');
+            }
+        }
+     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

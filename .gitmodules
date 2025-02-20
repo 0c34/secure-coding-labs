@@ -1,0 +1,3 @@
+[submodule "govwa"]
+	path = govwa
+	url = git@github.com:0c34/govwa.git

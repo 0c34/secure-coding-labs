@@ -68,7 +68,12 @@ class MainActivity : AppCompatActivity() {
             put("email", username)
             put("password", password)
         }.toString()
-
+        val signature = MainSigner.generateAndSign(jsonInputString)
+        val bodyReq = JSONObject().apply {
+            put("email", username)
+            put("password", password)
+            put("signature", signature)
+        }.toString()
         Thread {
             try {
                 val url = URL(urlString)
@@ -79,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Send login data
                 OutputStreamWriter(connection.outputStream).use { writer ->
-                    writer.write(jsonInputString)
+                    writer.write(bodyReq)
                 }
 
                 // Read the response

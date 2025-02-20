@@ -1,5 +1,6 @@
 const Comment = require('../models/commentModel');
 var xssFilters = require('xss-filters');
+
 exports.postComment = async(req, res) => {
     let {name, comment} = req.body
     

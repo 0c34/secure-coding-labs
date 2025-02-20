@@ -1,23 +1,56 @@
 <%- include('header') %>
 <div class="container-fluid">
-    <!-- Profile Card -->
     <div class="card mb-4">
         <div class="card-header">Profile Information</div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Name:</strong> <%= profile.name %></p>
-                    <p><strong>Email:</strong> <%= profile.email %></p>
-                    <p><strong>Phone Number:</strong> <%= profile.phone_number || 'N/A' %></p>
+            <form id="profileForm">
+                <!-- Hidden User ID Field -->
+                <input type="hidden" id="user_id" name="user_id" value="<%= profile.user_id %>">
+    
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label"><strong>Name</strong></label>
+                            <input type="text" class="form-control" id="name" name="name" value="<%= profile.name %>">
+                        </div>
+    
+                        <!-- Email (Readonly) -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label"><strong>Email</strong></label>
+                            <input type="email" class="form-control" id="email" name="email" value="<%= profile.email %>">
+                        </div>
+    
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label"><strong>Phone Number</strong></label>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" value="<%= profile.phone_number || '' %>">
+                        </div>
+                    </div>
+    
+                    <div class="col-md-6">
+                        <!-- Date of Birth -->
+                        <div class="mb-3">
+                            <label for="dob" class="form-label"><strong>Date of Birth</strong></label>
+                            <input type="date" class="form-control" id="dob" name="dob" value="<%= profile.dob ? profile.dob.toISOString().slice(0, 10) : '' %>">
+                        </div>
+    
+                        <!-- Account Created (Readonly) -->
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Account Created</strong></label>
+                            <input type="text" class="form-control" value="<%= profile.created_at ? profile.created_at.toISOString().slice(0, 10) : 'N/A' %>" readonly>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <p><strong>Date of Birth:</strong> <%= profile.dob ? profile.dob.toISOString().slice(0, 10) : 'N/A' %></p>
-                    <p><strong>Account Created:</strong> <%= profile.created_at ? profile.created_at.toISOString().slice(0, 10) : 'N/A'%></p>
-                </div>
-            </div>
+    
+                <!-- Update Profile Button -->
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+            
+            <!-- Alert Box -->
+            <div id="profile-alert" class="alert d-none mt-3"></div>
         </div>
     </div>
-
     <!-- Profile Picture Upload -->
     <div class="card mb-4">
         <div class="card-header">Upload Profile Picture</div>
@@ -43,6 +76,46 @@
     </div>
 </div>
 <script>
+
+    document.getElementById("profileForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const user_id = document.getElementById("user_id").value;
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const phone_number = document.getElementById("phone_number").value;
+        const dob = document.getElementById("dob").value;
+
+        const alertBox = document.getElementById("profile-alert");
+        alertBox.classList.add("d-none"); // Hide previous alerts
+        alertBox.classList.remove("alert-success", "alert-danger");
+
+        try {
+            const response = await fetch("/update-profile", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id, name, email, phone_number, dob }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alertBox.classList.add("alert-success");
+                alertBox.innerText = "Profile updated successfully!";
+            } else {
+                alertBox.classList.add("alert-danger");
+                alertBox.innerText = result.message || "Profile update failed.";
+            }
+            
+            alertBox.classList.remove("d-none");
+        } catch (error) {
+            console.error("Profile update error:", error);
+            alertBox.classList.add("alert-danger");
+            alertBox.innerText = "Something went wrong. Please try again.";
+            alertBox.classList.remove("d-none");
+        }
+    });
+
     document.getElementById('profilePicForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -70,5 +143,6 @@
             document.getElementById('uploadMessage').textContent = 'Error uploading file';
         }
     });
+
 </script>
 <%- include('footer') %>

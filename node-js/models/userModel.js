@@ -25,6 +25,22 @@ exports.getProfile = async({user_id}) => {
         throw error;
     }
 }
+exports.updateProfile = async({name, email, phone_number, dob, user_id}) => {
+    try {
+        const query = `UPDATE user_accounts 
+               SET name = '${name}', 
+                   email = '${email}', 
+                   phone_number = '${phone_number}', 
+                   dob = '${dob}' 
+               WHERE user_id = '${user_id}'`;
+
+        const update = await db.query(query);
+        console.log('Profile updated:', update);
+    } catch (error) {
+        console.error('Database query error:', error);
+        throw error;
+    }
+}
 exports.checkExisting = async({ email }) => {
     const query = 'SELECT email FROM user_accounts where email=?';
     const [existingUser] = await db.query(query,[email])

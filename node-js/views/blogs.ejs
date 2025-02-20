@@ -1,0 +1,222 @@
+<%- include('header') %>
+<div class="container-fluid">
+    <!-- Comments Table Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <span><strong>Blogs</strong></span>
+            <button type="button" class="btn btn-success btn-sm" onclick="openBlogModal('create')">
+                <i class="fas fa-plus"></i> <!-- Font Awesome Plus Icon -->
+            </button>
+        </div>
+        
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date Created</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% blogs.forEach(blog => { %>
+                    <tr>
+                        <td><%= blog.title %></td>
+                        <td><%= new Date(blog.created_at).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) %></td>
+                        <td>
+                            <!-- View Button to open modal -->
+                            <button class="btn btn-info btn-sm" onclick="openBlogModal('view','<%= blog.blog_id %>')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <!-- Edit Button -->
+                            <button class="btn btn-warning btn-sm" onclick="openBlogModal('edit','<%= blog.blog_id %>')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <!-- Delete Button -->
+                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= blog.blog_id %>')"> <!-- Confirm delete -->
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Blog Modal -->
+<div class="modal fade" id="blogModal" tabindex="-1" aria-labelledby="blogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blogModalLabel">New Blog Post</h5>
+                <button type="button" class="btn btn-secondary" id="closeModalBtn">Close</button>
+            </div>
+            <div class="modal-body">
+                <form id="blogForm">
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label"><strong>Title</strong></label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                        <input type="hidden" id="blogIdInput" name="blogId">
+                    </div>
+
+                    <!-- Header Image Upload -->
+                    <div class="mb-3">
+                        <label for="headerImage" class="form-label"><strong>Header Image</strong></label>
+                        <input type="file" class="form-control" id="headerImage" name="headerImage" accept="image/*">
+                    </div>
+
+                    <!-- Quill.js Editor -->
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Content</strong></label>
+                        <div id="editor-container" style="height: 300px;"></div>
+                    </div>
+
+                    <!-- Alert Box -->
+                    <div id="alert-box" class="alert d-none mt-3"></div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="btn btn-success">Publish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        // Initialize Quill.js Editor
+        var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        placeholder: 'Write your blog content here...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['blockquote', 'code-block'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image']
+            ]
+        }
+    });
+    document.getElementById('blogForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('title').value;
+        const content = quill.root.innerHTML;
+        const imageFile = document.getElementById('headerImage').files[0];
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('imageFile', imageFile);
+        formData.append('author', '<%= user_name %>');
+        const response = await fetch('/blogs', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        if (response.ok) {
+            document.getElementById('alert-box').classList.remove('alert-danger');
+            document.getElementById('alert-box').classList.add('alert-success');
+            document.getElementById('alert-box').classList.remove('d-none');
+            document.getElementById('alert-box').innerHTML = data.message;
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            document.getElementById('alert-box').classList.remove('alert-success');
+            document.getElementById('alert-box').classList.add('alert-danger');
+            document.getElementById('alert-box').classList.remove('d-none');
+            document.getElementById('alert-box').innerHTML = data.message;
+        }
+    });
+
+    async function openBlogModal(mode, blogId = null) {
+        const modalTitle = document.getElementById('blogModalLabel');
+        const blogForm = document.getElementById('blogForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const titleInput = document.getElementById('title');
+        const quillEditor = quill.root;
+
+        if (mode === 'edit' || mode === 'view') {
+            try {
+                // Fetch blog details
+                const response = await fetch(`/blogs/${blogId}`);
+                const blog = await response.json();
+                if (!response.ok) throw new Error(blog.message || "Failed to fetch blog");
+
+                // Update modal content
+                titleInput.value = blog.title;
+                quillEditor.innerHTML = blog.content;  // Load content into Quill
+
+                // If in view mode, disable inputs
+                if (mode === 'view') {
+                    modalTitle.textContent = "View Blog";
+                    titleInput.setAttribute("readonly", true);
+                    quillEditor.setAttribute("contenteditable", "false");
+                    submitBtn.classList.add("d-none"); // Hide submit button in view mode
+                } else {
+                    modalTitle.textContent = "Edit Blog";
+                    titleInput.removeAttribute("readonly");
+                    quillEditor.setAttribute("contenteditable", "true");
+                    submitBtn.classList.remove("d-none"); // Show submit button in edit mode
+                    submitBtn.innerText = "Update Blog";
+                }
+
+            } catch (error) {
+                console.error("Error fetching blog:", error);
+                alert("Error fetching blog details. Please try again.");
+                return;
+            }
+        } else {
+            // New Blog Mode (Reset Form)
+            modalTitle.textContent = "Create New Blog";
+            titleInput.value = "";
+            quillEditor.innerHTML = "";  // Clear editor content
+            blogIdInput.value = "";
+            submitBtn.classList.remove("d-none"); // Show submit button
+            submitBtn.innerText = "Publish Blog";
+        }
+
+        // Show the modal
+        var myModal = new bootstrap.Modal(document.getElementById('blogModal'));
+        myModal.show();
+}
+async function confirmDelete(blogId) {
+    if (!confirm("Are you sure you want to delete this blog? This action cannot be undone.")) {
+        return; // Exit if user cancels
+    }
+
+    try {
+        const response = await fetch(`/blogs/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ blog_id: blogId })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("Blog deleted successfully!");
+            window.location.reload(); // Refresh page after deletion
+        } else {
+            alert("Error: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error deleting blog:", error);
+        alert("Failed to delete blog. Please try again.");
+    }
+}
+function closeModal() {
+    var modalElement = document.getElementById("blogModal");
+    var modal = new bootstrap.Modal(modalElement);
+    modal.hide(); // Correct way to close modal
+}
+
+// Example usage:
+document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+</script>
+
+<%- include('footer') %>
