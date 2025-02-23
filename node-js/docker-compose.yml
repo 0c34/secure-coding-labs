@@ -12,7 +12,8 @@ services:
       - MYSQL_PASS=securecodepass
       - MYSQL_DATABASE=securecodedb
     depends_on:
-      - nodejs_db
+      nodejs_db:
+        condition: service_healthy
     networks:
       - app_network
   nodejs_db:
@@ -26,6 +27,11 @@ services:
       MYSQL_PASSWORD: securecodepass
     ports:
       - '3306:3306'
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -40,8 +46,19 @@ services:
       - '80:80'
     networks:
       - app_network
+  redis:
+    image: redis:latest
+    container_name: redis-server
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
 volumes:
   db_data:
+  redis_data:
 networks:
   app_network:
     driver: bridge

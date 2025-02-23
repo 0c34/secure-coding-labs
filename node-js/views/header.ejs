@@ -50,12 +50,14 @@
                     <span>Profile</span>
                 </a>
             </li>
+            <% if (role === 'admin') { %>
             <li class="nav-item">
-                <a class="nav-link" href="/initial-setup">
+                <a class="nav-link" href="/users">
                     <i class="fas fa-cog"></i>
-                    <span>Setup</span>
+                    <span>Users</span>
                 </a>
             </li>
+            <% } %>
             <li class="nav-item">
                 <a class="nav-link" href="/logout">
                     <i class="fas fa-sign-out-alt"></i>

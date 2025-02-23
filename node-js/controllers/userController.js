@@ -8,14 +8,14 @@ const md5 = require('md5');
 
 const JWT_SECRET = 'securecodesecret'
 const saltRounds = 10;
+const HMAC_KEY = 'mykey321';
 
 exports.getProfile = async (req, res) =>{
-    const userId = req.session.user_id //req.user.user_id//r
+    const userId = req.session.user_id
     if (!userId){
         return res.status(400).send("User ID is requeired")
     }
     try{
-        console.log(`userid:${userId}`)
         const profile = await User.getProfile({user_id: userId})
         if (!profile) {
             return res.status(404).send('User not found');
@@ -49,8 +49,7 @@ exports.registerPage = (req, res) => {
     res.render('register');
 };
 
-exports.registerUser = async (req, res) => {
-    console.log(req.body);  
+exports.registerUser = async (req, res) => { 
     const { name, email, phone_number, password, dob } = req.body;
 
     const isExsisting = await User.checkExisting({email})
@@ -71,7 +70,47 @@ exports.registerUser = async (req, res) => {
     }
 };
 
+exports.login = async(req, res) => {
+    try{
+        const {email, password} = req.body;
+        const user = await User.login({email:email});
+        if(!user || user.length === 0){
+            return res.status(401).json({message:'Invalid email or password'});
+        }
+        if (user[0] && await comparePassword(password, user[0].password_hash)){
+            const user_id = user[0].user_id;
+            const user_name = user[0].name;
+            req.session.user_id = user_id;
+            req.session.user_name = user_name;
+            req.session.role = user[0].role;
+            res.status(200).json({page: 'home'});
+        }else{
+            res.status(401).json({message:'Invalid email or password'});
+        }
+    }catch (err){
+            console.error('Error logging in user:', err);
+            res.status(500).send('Internal Server Error');
+        }
 
+}
+exports.logout = (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+}
+exports.getUsers = async (req, res) => {
+    try {
+        const users = await User.getUsers();
+        res.json(users);
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).send('Internal Server Error');
+    }
+}
+exports.usersPage = async (req, res) => {
+        res.render('users');
+}
+
+//API and Mobile login
 generateToken = async (user_id, secret) => {
     const token = jwt.sign({user_id}, secret, {expiresIn:'1h'})
     return token
@@ -80,8 +119,6 @@ generateToken = async (user_id, secret) => {
 exports.loginPage = (req, res) => {
     res.render('login');
 }
-
-const HMAC_KEY = 'mykey321'; // Hardcoded HMAC key
 
 // Function to sign data and return HMAC signature
 function signData(data) {
@@ -102,30 +139,6 @@ comparePassword = async (inputPassword, storedHash) => {
     return hashedInputPassword === storedHash;
 };
 
-exports.login = async(req, res) => {
-    try{
-        const {email, password} = req.body;
-        const user = await User.login({email:email});
-        console.log(email)
-        console.log(user);
-        if(!user || user.length === 0){
-            return res.status(401).json({message:'Invalid email or password'});
-        }
-        if (user[0] && await comparePassword(password, user[0].password_hash)){
-            const user_id = user[0].user_id;
-            const user_name = user[0].name;
-            req.session.user_id = user_id;
-            req.session.user_name = user_name;
-            res.status(200).json({page: 'home'});
-        }else{
-            res.status(401).json({message:'Invalid email or password'});
-        }
-    }catch (err){
-            console.error('Error logging in user:', err);
-            res.status(500).send('Internal Server Error');
-        }
-
-}
 exports.loginMobile = async(req, res) => {
     const {email, password} = req.body
     const user = await User.login({email:email})

@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Blog Home - Start Bootstrap Template</title>
+        <title>Blog Home</title>
         <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- <link rel="icon" type="image/x-icon" href="assets/favicon.ico" /> -->
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
     </head>
@@ -23,6 +23,9 @@
                         <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
                         <li class="nav-item"><a class="nav-link" href="#!">Contact</a></li>
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Blog</a></li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="/login">Login</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -45,10 +48,14 @@
                     <div class="card mb-4">
                         <a href="#!"><img class="card-img-top" src="<%= latest_blog.image_path %>" alt="..." /></a>
                         <div class="card-body">
-                            <div class="small text-muted"><%= latest_blog.author %></div>
+                            <div class="small text-muted">Posted on <%= new Date(latest_blog.created_at).toLocaleDateString("en-US", { 
+                                month: "short", 
+                                day: "2-digit", 
+                                year: "numeric" 
+                            }) %> by <%= latest_blog.author %></div>
                             <h2 class="card-title"><%= latest_blog.title %></h2>
                             <p class="card-text"><%- latest_blog.content %></p>
-                            <a class="btn btn-primary" href="#!">Read more →</a>
+                            <a class="btn btn-primary" href="/view-blog/<%= latest_blog.blog_id %>">Read more →</a>
                         </div>
                     </div>
                     <!-- Nested row for non-featured blog posts-->
@@ -61,17 +68,7 @@
                                     <div class="small text-muted">January 1, 2023</div>
                                     <h2 class="card-title h4">Post Title</h2>
                                     <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reiciendis aliquid atque, nulla.</p>
-                                    <a class="btn btn-primary" href="#!">Read more →</a>
-                                </div>
-                            </div>
-                            <!-- Blog post-->
-                            <div class="card mb-4">
-                                <a href="#!"><img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="..." /></a>
-                                <div class="card-body">
-                                    <div class="small text-muted">January 1, 2023</div>
-                                    <h2 class="card-title h4">Post Title</h2>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reiciendis aliquid atque, nulla.</p>
-                                    <a class="btn btn-primary" href="#!">Read more →</a>
+                                    <a class="btn btn-primary" href="">Read more →</a>
                                 </div>
                             </div>
                         </div>
@@ -83,16 +80,6 @@
                                     <div class="small text-muted">January 1, 2023</div>
                                     <h2 class="card-title h4">Post Title</h2>
                                     <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reiciendis aliquid atque, nulla.</p>
-                                    <a class="btn btn-primary" href="#!">Read more →</a>
-                                </div>
-                            </div>
-                            <!-- Blog post-->
-                            <div class="card mb-4">
-                                <a href="#!"><img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="..." /></a>
-                                <div class="card-body">
-                                    <div class="small text-muted">January 1, 2023</div>
-                                    <h2 class="card-title h4">Post Title</h2>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reiciendis aliquid atque, nulla? Quos cum ex quis soluta, a laboriosam.</p>
                                     <a class="btn btn-primary" href="#!">Read more →</a>
                                 </div>
                             </div>
@@ -131,16 +118,16 @@
                             <div class="row">
                                 <div class="col-sm-6">
                                     <ul class="list-unstyled mb-0">
-                                        <li><a href="#!">Web Design</a></li>
-                                        <li><a href="#!">HTML</a></li>
-                                        <li><a href="#!">Freebies</a></li>
+                                        <li><a href="#!">Data Breach</a></li>
+                                        <li><a href="#!">Threat Intelligence</a></li>
+                                        <li><a href="#!">Threat Hunting</a></li>
                                     </ul>
                                 </div>
                                 <div class="col-sm-6">
                                     <ul class="list-unstyled mb-0">
-                                        <li><a href="#!">JavaScript</a></li>
-                                        <li><a href="#!">CSS</a></li>
-                                        <li><a href="#!">Tutorials</a></li>
+                                        <li><a href="#!">Secure Coding</a></li>
+                                        <li><a href="#!">Web Security</a></li>
+                                        <li><a href="#!">Mobile Security</a></li>
                                     </ul>
                                 </div>
                             </div>

@@ -7,18 +7,14 @@ const db = require('../config/database');
 
 
 exports.getProfile = async({user_id}) => {
-    console.log(`userid:${user_id}`)
     try {
         const query = 'SELECT * FROM user_accounts WHERE user_id = ?';
-        console.log(`sql query: ${query}`)
         const [rows] = await db.query(query, [user_id]);
         
         if (rows.length === 0) {
             console.log(`No data found for user_id: ${user_id}`);
             return null;
         }
-        
-        console.log('Data:', rows[0]);
         return rows[0];
     } catch (error) {
         console.error('Database query error:', error);
@@ -31,12 +27,23 @@ exports.updateProfile = async({name, email, phone_number, dob, user_id}) => {
                SET name = '${name}', 
                    email = '${email}', 
                    phone_number = '${phone_number}', 
-                   dob = '${dob}' 
+                   dob = '${dob}'
                WHERE user_id = '${user_id}'`;
 
         const update = await db.query(query);
         console.log('Profile updated:', update);
     } catch (error) {
+        console.error('Database query error:', error);
+        throw error;
+    }
+}
+exports.getUsers = async () => {
+    try {
+        const query = 'SELECT * FROM user_accounts';
+        const [rows] = await db.query(query);
+        return rows;
+    }
+    catch (error) {
         console.error('Database query error:', error);
         throw error;
     }

@@ -15,12 +15,3 @@ try {
 } catch(err){
     res.status(500).send("Connection Erro")
 }
-exports.checkTable = async(tableName)=>{
-    let query = "SELECT 1 FROM ?? LIMIT 1"
-    connection.query(query,[tableName], (error))
-    if(error){
-        if(error.code === 'ER_NO_SUCH_TABLE'){
-            console.log(`Table "${tableName}" does not exist.`);
-        }
-    }
-}
